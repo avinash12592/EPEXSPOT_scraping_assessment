@@ -15,6 +15,10 @@ This assessmrent is a QA-focused automation script that extracts specific and ex
 - Writes the cleaned output to `epex_data.csv`
 - Fails the test if no valid data is found
 
+NOTES:
+The script avoids third-party stealth or bypass libraries and relies on Playwright-native browser configuration and realistic timing to prevent false automation detection.
+Market data may not be available on weekends or holidays; a small date offset is applied for stability.
+
 ---
 
 ## Tech Stack

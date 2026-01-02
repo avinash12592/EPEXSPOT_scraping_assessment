@@ -1,3 +1,5 @@
+'''Scraping EPEX SPOT market data using Playwright.'''
+
 import csv
 import pytest
 import logging
@@ -12,7 +14,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="session")
 def yesterday_url():
 
-    # NOTE: Jan 1st is often a holiday; fallback added for stability
+    # Getting the Yesterday's date in 'YYYY-MM-DD' format
     yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
     return (
         f"https://www.epexspot.com/en/market-results?market_area=GB&auction=&trading_date=&delivery_date={yesterday}&underlying_year=&modality=Continuous&sub_modality=&technology=&data_mode=table&period=&production_period=&product=30"
@@ -66,15 +68,13 @@ def test_scrape_epexspot(yesterday_url):
                 except TimeoutError:
                     continue
 
-            # Human-like pause (prevents false automation heuristics)
+            # Human-like pause
             page.wait_for_timeout(2000)
 
             page.wait_for_selector("div.js-table-values table", timeout=15000)
             logger.info("Table loaded")
 
-            table_rows = page.locator(
-                "div.js-table-values tbody tr"
-            ).all()
+            table_rows = page.locator('xpath=//tr[contains(@class, "child")]').all()
 
             for idx, row in enumerate(table_rows, 1):
                 cells = row.locator("td").all()[:4]
@@ -94,6 +94,7 @@ def test_scrape_epexspot(yesterday_url):
             context.close()
             browser.close()
 
+    # Exporting to CSV
     output_path = Path("epex_data.csv")
     with open(output_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
